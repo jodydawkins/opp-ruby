@@ -12,6 +12,10 @@ RSpec.describe "README lifecycle" do
       "OPP::Presence.verify!",
       "OPP::Signature.sign",
       "OPP::Signature.verify!",
+      "Do not log, publish, or commit it",
+      "Unknown top-level fields",
+      "does not validate Directory Registration schemas",
+      "UPSTREAM.yml",
       "no CLI"
     )
   end
@@ -28,5 +32,11 @@ RSpec.describe "README lifecycle" do
     expect(OPP::Subject.derive(pair.public_key)).to eq(signed["subject"])
     expect(OPP::Presence.verify(signed, at: Time.iso8601("2026-07-12T12:00:00Z"))).to be_valid
     expect(OPP::Presence.verify!(signed, at: Time.iso8601("2026-07-12T12:00:00Z"))).to be(true)
+
+    generic = OPP::Signature.sign(
+      { "type" => "directory-registration", "extension" => { "enabled" => true } },
+      private_key: pair.private_key
+    )
+    expect(OPP::Signature.verify!(generic, public_key: pair.public_key)).to be(true)
   end
 end
