@@ -4,8 +4,8 @@ module OPP
 
     def initialize(message = nil, code: nil, path: nil)
       super(message)
-      @code = code || self.class.name.split("::").last.delete_suffix("Error")
-        .gsub(/([a-z\d])([A-Z])/, "\\1_\\2").downcase
+      @code = code || self.class.name.split("::").last
+        .gsub(/([a-z\d])([A-Z])/, "\\1_\\2").downcase.delete_suffix("_error")
       @path = path
     end
   end

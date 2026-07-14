@@ -1,4 +1,8 @@
 RSpec.describe OPP::Error do
+  it "derives a code for the base error class" do
+    expect(described_class.new.code).to eq("error")
+  end
+
   it "exposes a default machine-readable code and optional path" do
     error = OPP::InvalidEncodingError.new("bad encoding", path: ["public_key"])
 
