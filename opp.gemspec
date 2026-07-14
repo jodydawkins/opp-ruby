@@ -10,6 +10,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "ed25519", "~> 1.4"
+  spec.add_dependency "base64", ">= 0.2", "< 1"
   spec.add_dependency "json-canonicalization", "~> 0.4"
   spec.add_development_dependency "rspec", "~> 3.13"
 end

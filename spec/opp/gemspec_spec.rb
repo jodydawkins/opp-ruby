@@ -9,4 +9,10 @@ RSpec.describe "opp.gemspec" do
 
     expect(gemspec.files.sort).to eq(expected.sort)
   end
+
+  it "declares base64 as a runtime dependency" do
+    gemspec = Gem::Specification.load(File.expand_path("../../opp.gemspec", __dir__))
+
+    expect(gemspec.runtime_dependencies.map(&:name)).to include("base64")
+  end
 end
