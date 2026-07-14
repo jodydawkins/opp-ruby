@@ -55,15 +55,13 @@ RSpec.describe OPP::Signature do
     expect(described_class.verify(signed, public_key:)).to be(false)
   end
 
-  it "requires the signature object to contain exactly two string-keyed string members" do
+  it "requires string-valued algorithm and value members" do
     valid = described_class.sign(registration, private_key:)
     invalid_signatures = [
       nil,
       { "algorithm" => "ed25519" },
       { "algorithm" => "ed25519", "value" => 7 },
-      { algorithm: "ed25519", value: valid.dig("signature", "value") },
-      valid["signature"].merge("extra" => true),
-      valid["signature"].merge(extra: true)
+      { algorithm: "ed25519", value: valid.dig("signature", "value") }
     ]
 
     invalid_signatures.each do |signature|
@@ -71,6 +69,17 @@ RSpec.describe OPP::Signature do
       expect { described_class.verify!(document, public_key:) }
         .to raise_error(OPP::InvalidSignatureError)
     end
+  end
+
+  it "ignores unknown signature members" do
+    signed = described_class.sign(registration, private_key:)
+
+    expect(
+      described_class.verify!(
+        signed.merge("signature" => signed["signature"].merge("extra" => true, extra: true)),
+        public_key:
+      )
+    ).to be(true)
   end
 
   it "recognizes only the top-level string signature key" do
