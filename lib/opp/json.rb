@@ -2,26 +2,36 @@ require "json"
 
 module OPP
   module JSON
-    class DuplicateCheckingHash < Hash
-      def []=(key, value)
-        raise DuplicateMemberError, "duplicate JSON member: #{key}" if key?(key)
+    class DuplicateCheckingObject
+      include Enumerable
 
-        super
+      def initialize
+        @members = {}
+      end
+
+      def []=(key, value)
+        raise DuplicateMemberError, "duplicate JSON member: #{key}" if @members.key?(key)
+
+        @members[key] = value
+      end
+
+      def each(&block)
+        @members.each(&block)
       end
     end
-    private_constant :DuplicateCheckingHash
+    private_constant :DuplicateCheckingObject
 
     module_function
 
     def parse(input)
-      plain_value(::JSON.parse(input, object_class: DuplicateCheckingHash))
+      plain_value(::JSON.parse(input, object_class: DuplicateCheckingObject))
     rescue ::JSON::ParserError, EncodingError => error
       raise ParseError, error.message
     end
 
     def plain_value(value)
       case value
-      when DuplicateCheckingHash
+      when DuplicateCheckingObject
         value.to_h { |key, member| [valid_string(key), plain_value(member)] }
       when Array
         value.map { |member| plain_value(member) }
