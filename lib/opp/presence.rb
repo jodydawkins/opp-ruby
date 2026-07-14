@@ -115,7 +115,8 @@ module OPP
 
       if issued_at && expires_at <= issued_at
         errors << ValidationError.new("expires_at must be later than issued_at", path: "expires_at")
-      elsif at && at >= expires_at
+      end
+      if at && at >= expires_at
         errors << ExpiredDocumentError.new("document has expired", path: "expires_at")
       end
     end

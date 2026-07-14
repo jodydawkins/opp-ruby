@@ -130,13 +130,30 @@ RSpec.describe OPP::Presence do
   end
 
   it "requires expires_at to be later than issued_at" do
+    before_expiration = Time.iso8601("2026-07-11T19:00:00Z")
+
     ["2026-07-11T20:00:00Z", "2026-07-11T19:59:59Z"].each do |expires_at|
       candidate = document.merge("expires_at" => expires_at, "public_key" => public_key, "subject" => subject)
       signed = OPP::Signature.sign(candidate, private_key:)
 
-      expect(described_class.verify(signed, at: verification_time).errors.map(&:path))
+      expect(described_class.verify(signed, at: before_expiration).errors.map(&:path))
         .to eq(["expires_at"])
     end
+  end
+
+  it "reports both invalid ordering and expiration when both timestamps are usable" do
+    candidate = document.merge(
+      "expires_at" => "2026-07-11T20:00:00Z",
+      "public_key" => public_key,
+      "subject" => subject
+    )
+    signed = OPP::Signature.sign(candidate, private_key:)
+
+    result = described_class.verify(signed, at: verification_time)
+    expect(result.errors.map { |error| [error.class, error.path] }).to eq([
+      [OPP::ValidationError, "expires_at"],
+      [OPP::ExpiredDocumentError, "expires_at"]
+    ])
   end
 
   it "expires at the exact boundary and accepts fractional UTC timestamps" do
