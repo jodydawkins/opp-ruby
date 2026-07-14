@@ -115,7 +115,9 @@ RSpec.describe OPP::Presence do
       "2026-07-11T20:00:00z",
       "2026-07-11T20:00:00+00:00",
       "2026-07-11T20:00Z",
-      "2026-02-30T20:00:00Z"
+      "2026-02-30T20:00:00Z",
+      "2026-07-11T24:00:00Z",
+      "2026-07-11T20:00:61Z"
     ]
 
     invalid_values.each do |issued_at|
@@ -127,6 +129,16 @@ RSpec.describe OPP::Presence do
       expect(result.errors.map { |error| [error.class, error.path] })
         .to eq([[OPP::ValidationError, "issued_at"]])
     end
+  end
+
+  it "normalizes an RFC 3339 leap second for ordering and expiration" do
+    candidate = document.merge(
+      "issued_at" => "1990-12-31T23:59:60Z",
+      "expires_at" => "1991-01-01T00:00:01Z"
+    )
+
+    signed = described_class.sign(candidate, private_key:)
+    expect(described_class.verify(signed, at: Time.iso8601("1991-01-01T00:00:00Z"))).to be_valid
   end
 
   it "requires expires_at to be later than issued_at" do

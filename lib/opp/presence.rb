@@ -1,3 +1,4 @@
+require "date"
 require "time"
 require "uri"
 
@@ -14,7 +15,7 @@ module OPP
       "signature" => Hash,
       "expires_at" => String
     }.freeze
-    TIMESTAMP_PATTERN = /\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\z/
+    TIMESTAMP_PATTERN = /\A(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})T(?<hour>\d{2}):(?<minute>\d{2}):(?<second>\d{2})(?:\.(?<fraction>\d+))?Z\z/
 
     module_function
 
@@ -126,15 +127,20 @@ module OPP
       value = document[field]
       return unless value.is_a?(String)
 
-      unless TIMESTAMP_PATTERN.match?(value)
+      match = TIMESTAMP_PATTERN.match(value)
+      unless match
         errors << ValidationError.new("#{field} must be an RFC 3339 UTC timestamp", path: field)
         return
       end
 
-      parsed = Time.iso8601(value)
-      raise ArgumentError unless parsed.strftime("%Y-%m-%dT%H:%M:%S") == value[0, 19]
+      year, month, day, hour, minute, second =
+        %i[year month day hour minute second].map { |component| match[component].to_i }
+      date = Date.new(year, month, day)
+      raise ArgumentError unless hour.between?(0, 23) && minute.between?(0, 59) && second.between?(0, 60)
+      raise ArgumentError if second == 60 && (hour != 23 || minute != 59 || date.next_day.day != 1)
 
-      parsed
+      fraction = match[:fraction] ? Rational(match[:fraction].to_i, 10**match[:fraction].length) : 0
+      Time.utc(year, month, day, hour, minute, [second, 59].min) + fraction + (second == 60 ? 1 : 0)
     rescue ArgumentError
       errors << ValidationError.new("#{field} must be a valid timestamp", path: field)
       nil
