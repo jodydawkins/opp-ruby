@@ -43,11 +43,10 @@ module OPP
       unsigned = unsigned_document(document)
       signature = document["signature"]
       unless signature.is_a?(Hash) &&
-          signature.size == 2 &&
-          signature.key?("algorithm") && signature.key?("value") &&
-          signature.values.all?(String)
+          signature["algorithm"].is_a?(String) &&
+          signature["value"].is_a?(String)
         raise InvalidSignatureError, "invalid signature object"
-      end
+end
 
       [unsigned, copy(signature)]
     end

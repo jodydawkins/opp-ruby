@@ -94,7 +94,8 @@ validation. This is useful for other OPP objects:
 
 ```ruby
 registration = {
-  "type" => "directory-registration",
+  "type" => "open-presence-directory-registration",
+  "version" => "0.2"
   "sequence" => 7,
   "subject" => subject,
   "extension" => { "enabled" => true }
