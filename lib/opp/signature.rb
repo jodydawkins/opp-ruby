@@ -46,7 +46,7 @@ module OPP
           signature["algorithm"].is_a?(String) &&
           signature["value"].is_a?(String)
         raise InvalidSignatureError, "invalid signature object"
-end
+      end
 
       [unsigned, copy(signature)]
     end
