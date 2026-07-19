@@ -1,5 +1,5 @@
 Gem::Specification.new do |spec|
-  spec.name = "opp"
+  spec.name = "open-presence"
   spec.version = "0.1.0"
   spec.authors = ["Jody Dawkins"]
   spec.summary = "Open Presence Protocol for Ruby"
