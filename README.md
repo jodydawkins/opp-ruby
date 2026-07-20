@@ -8,7 +8,7 @@ lifecycle and reusable OPP signing primitives for Ruby 3.2 and newer.
 Add the gem to your bundle:
 
 ```ruby
-gem "opp", "~> 0.1.0"
+gem "open-presence", "~> 0.1.0"
 ```
 
 Then run `bundle install`. To install it directly, run
